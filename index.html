@@ -1,0 +1,2648 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#080c14" />
+  <title>Vértice Estudio | Arquitectura, Ingeniería, Modelado SketchUp/Revit y Dirección de Proyectos</title>
+  <meta name="description" content="Estudio integral de arquitectura, ingeniería estructural, diseño de planos constructivos, modelado BIM 3D en SketchUp y Revit, renders 8K y dirección de obra." />
+  <meta property="og:title" content="Vértice Estudio | Arquitectura, Ingeniería y Modelado 3D BIM" />
+  <meta property="og:description" content="Damos forma a tus ideas desde el primer trazo en SketchUp y Revit hasta la obra terminada. Explora nuestras maquetas 3D, renders 8K y cotizador interactivo." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/img/villa.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c14'/%3E%3Cpolygon points='32,8 54,20 54,44 32,56 10,44 10,20' fill='none' stroke='%23e0b172' stroke-width='3'/%3E%3Cpolyline points='10,20 32,32 54,20' fill='none' stroke='%237dd3fc' stroke-width='2.5'/%3E%3Cline x1='32' y1='32' x2='32' y2='56' stroke='%23e0b172' stroke-width='2.5'/%3E%3C/svg%3E" />
+  <link rel="preload" as="image" href="assets/img/skp-villa.jpg" />
+  <link rel="preload" as="image" href="assets/img/villa.jpg" />
+  <style>
+    :root {
+      --bg-deep: #080c14;
+      --bg-soft: #0e1522;
+      --bg-panel: rgba(16, 23, 38, 0.78);
+      --bg-card: rgba(20, 29, 46, 0.72);
+      --border-soft: rgba(255, 255, 255, 0.09);
+      --border-highlight: rgba(224, 177, 114, 0.45);
+      --gold: #e0b172;
+      --gold-soft: #f3d5b5;
+      --sky: #7dd3fc;
+      --sky-deep: #38bdf8;
+      --sage: #34d399;
+      --text-main: #f4f1ea;
+      --text-body: #cbd5e1;
+      --text-muted: #94a3b8;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      --font-serif: 'Georgia', 'Times New Roman', serif;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    body {
+      background-color: var(--bg-deep);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.7;
+      font-weight: 400;
+      overflow-x: hidden;
+      font-variant-numeric: tabular-nums;
+    }
+
+    ::selection {
+      background: rgba(224, 177, 114, 0.28);
+      color: #fff;
+    }
+
+    #bg-ambient-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    #cursor-aura {
+      position: fixed;
+      width: 560px;
+      height: 560px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(224, 177, 114, 0.08) 0%, rgba(125, 211, 252, 0.05) 45%, transparent 70%);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      will-change: transform;
+    }
+
+    @media (hover: none), (pointer: coarse) {
+      #cursor-aura { display: none; }
+    }
+
+    #scroll-progress {
+      position: fixed;
+      top: 0; left: 0;
+      height: 2.5px;
+      background: linear-gradient(90deg, var(--gold), var(--sky));
+      width: 0%;
+      z-index: 1000;
+      transition: width 0.1s linear;
+    }
+
+    /* NAVEGACIÓN EDITORIAL FLOTANTE */
+    header.navbar {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(1280px, 94vw);
+      background: rgba(11, 16, 27, 0.86);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid var(--border-soft);
+      border-radius: 999px;
+      padding: 12px 26px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      z-index: 900;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+      transition: background 0.35s var(--ease-out-expo), border-color 0.35s;
+    }
+    header.navbar:hover { border-color: rgba(224, 177, 114, 0.28); }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 1.06rem;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+    .brand-serif {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 400;
+      color: var(--gold);
+    }
+
+    .cube-wrap { width: 26px; height: 26px; perspective: 140px; flex-shrink: 0; }
+    .cube {
+      width: 100%; height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: floatSpinCube 14s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95);
+    }
+    .cube-face {
+      position: absolute;
+      width: 26px; height: 26px;
+      border: 1px solid var(--gold);
+      background: rgba(224, 177, 114, 0.12);
+      border-radius: 3px;
+    }
+    .cube-face.front  { transform: rotateY(  0deg) translateZ(13px); }
+    .cube-face.back   { transform: rotateY(180deg) translateZ(13px); }
+    .cube-face.right  { transform: rotateY( 90deg) translateZ(13px); border-color: var(--sky); }
+    .cube-face.left   { transform: rotateY(-90deg) translateZ(13px); border-color: var(--sky); }
+    .cube-face.top    { transform: rotateX( 90deg) translateZ(13px); }
+    .cube-face.bottom { transform: rotateX(-90deg) translateZ(13px); }
+
+    @keyframes floatSpinCube {
+      0%   { transform: rotateX(-20deg) rotateY(0deg) translateY(0px); }
+      50%  { transform: rotateX(-28deg) rotateY(180deg) translateY(-2px); }
+      100% { transform: rotateX(-20deg) rotateY(360deg) translateY(0px); }
+    }
+
+    .nav-links { display: flex; gap: 24px; list-style: none; }
+    .nav-links a {
+      color: var(--text-body);
+      text-decoration: none;
+      font-size: 0.91rem;
+      font-weight: 400;
+      transition: color 0.25s ease;
+      position: relative;
+      padding: 4px 0;
+      white-space: nowrap;
+    }
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0; bottom: 0;
+      width: 0%; height: 1.5px;
+      background: var(--gold);
+      transition: width 0.3s var(--ease-out-expo);
+    }
+    .nav-links a:hover { color: #fff; }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-cta {
+      background: linear-gradient(135deg, var(--gold), #c89250);
+      color: #0b0f17;
+      font-weight: 600;
+      font-size: 0.89rem;
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(224, 177, 114, 0.25);
+      transition: transform 0.3s var(--ease-spring), box-shadow 0.3s ease;
+    }
+    .nav-cta:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 12px 30px rgba(224, 177, 114, 0.42);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      font-size: 1.15rem;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .mobile-menu-btn:hover {
+      border-color: var(--gold);
+      background: rgba(224, 177, 114, 0.12);
+    }
+
+    main {
+      position: relative;
+      z-index: 2;
+      max-width: 1340px;
+      margin: 0 auto;
+      padding: 114px 24px 90px;
+    }
+
+    .eyebrow-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      color: var(--gold-soft);
+      background: rgba(224, 177, 114, 0.1);
+      border: 1px solid rgba(224, 177, 114, 0.25);
+      padding: 7px 16px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+      letter-spacing: 0.02em;
+    }
+    .eyebrow-pill .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 10px var(--gold);
+      flex-shrink: 0;
+      animation: breatheDot 2.8s infinite ease-in-out;
+    }
+    @keyframes breatheDot {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.4); opacity: 0.4; }
+    }
+
+    /* HERO SECTION */
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 0.92fr 1.28fr;
+      gap: 38px;
+      align-items: center;
+      min-height: calc(100vh - 135px);
+      padding: 8px 0 36px;
+    }
+
+    .hero-title {
+      font-size: clamp(2.1rem, 3.7vw, 3.3rem);
+      font-weight: 600;
+      line-height: 1.15;
+      letter-spacing: -0.015em;
+      margin-bottom: 18px;
+      color: var(--text-main);
+    }
+
+    .hero-title em {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 400;
+      background: linear-gradient(90deg, var(--gold-soft) 0%, var(--gold) 50%, var(--sky) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      padding-right: 4px;
+    }
+
+    .hero-subtitle {
+      color: var(--text-body);
+      font-size: 1.03rem;
+      line-height: 1.72;
+      margin-bottom: 24px;
+      max-width: 540px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), #c78d47);
+      color: #090d16;
+      font-weight: 600;
+      padding: 13px 24px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.94rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      box-shadow: 0 10px 28px rgba(224, 177, 114, 0.25);
+      transition: transform 0.35s var(--ease-spring), box-shadow 0.35s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 16px 36px rgba(224, 177, 114, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      font-weight: 500;
+      padding: 13px 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      cursor: pointer;
+      font-size: 0.94rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.3s var(--ease-out-expo);
+    }
+    .btn-secondary:hover {
+      border-color: var(--gold);
+      background: rgba(224, 177, 114, 0.08);
+      transform: translateY(-3px);
+    }
+
+    .hero-strip-label {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .hero-render-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .mini-render-card {
+      position: relative;
+      height: 88px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      cursor: pointer;
+      transition: transform 0.4s var(--ease-spring), border-color 0.3s, box-shadow 0.3s;
+    }
+    .mini-render-card.active-thumb,
+    .mini-render-card:hover {
+      transform: translateY(-4px) scale(1.03);
+      border-color: var(--gold);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.5);
+    }
+    .mini-render-card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s var(--ease-out-expo);
+    }
+    .mini-render-card:hover img { transform: scale(1.1); }
+    .mini-render-card span {
+      position: absolute;
+      inset: auto 0 0 0;
+      background: linear-gradient(transparent, rgba(8, 12, 20, 0.92));
+      font-size: 0.76rem;
+      padding: 16px 10px 6px;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    /* ESTUDIO INTERACTIVO SKETCHUP / REVIT 3D DE ALTA DEFINICIÓN */
+    .bim-studio-card {
+      position: relative;
+      background: #0d1422;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 26px;
+      overflow: hidden;
+      box-shadow: 0 32px 75px rgba(0, 0, 0, 0.72);
+      transition: border-color 0.4s ease;
+    }
+    .bim-studio-card:hover {
+      border-color: rgba(224, 177, 114, 0.45);
+    }
+
+    .bim-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 13px 20px;
+      background: rgba(10, 15, 24, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .bim-app-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--text-main);
+      flex-wrap: wrap;
+    }
+    .bim-app-badge {
+      background: rgba(224, 177, 114, 0.18);
+      border: 1px solid rgba(224, 177, 114, 0.45);
+      color: var(--gold-soft);
+      font-size: 0.72rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .mode-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .mode-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-body);
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 6px 13px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.25s var(--ease-out-expo);
+    }
+    .mode-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+    .mode-btn.active {
+      background: rgba(224, 177, 114, 0.22);
+      border-color: var(--gold);
+      color: var(--gold-soft);
+      box-shadow: 0 4px 14px rgba(224, 177, 114, 0.2);
+    }
+
+    /* Escenario 3D con perspectiva real e interacción */
+    .skp-viewport {
+      position: relative;
+      width: 100%;
+      height: 465px;
+      overflow: hidden;
+      perspective: 1400px;
+      background: radial-gradient(circle at 50% 50%, #1a2436, #090e18);
+      user-select: none;
+      cursor: grab;
+      touch-action: pan-y;
+    }
+    .skp-viewport:active { cursor: grabbing; }
+
+    .skp-stage-3d {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: filter 0.4s ease;
+    }
+
+    .skp-layer-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+      transition: opacity 0.45s var(--ease-out-expo), filter 0.45s ease;
+    }
+
+    /* Capa de recorte cuando está activo el modo Transición Maqueta ↔ Render */
+    #hero-render-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      clip-path: inset(0 0 0 100%);
+      pointer-events: none;
+    }
+
+    #hero-split-bar {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 50%;
+      width: 2.5px;
+      background: var(--gold);
+      box-shadow: 0 0 18px var(--gold);
+      z-index: 12;
+      display: none;
+      pointer-events: none;
+    }
+    #hero-split-knob {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: rgba(10, 15, 24, 0.92);
+      border: 2px solid var(--gold);
+      color: var(--gold-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 22px rgba(0,0,0,0.65);
+      font-size: 0.95rem;
+    }
+
+    /* Pines interactivos 3D sobre la maqueta SketchUp / Revit */
+    .skp-pin {
+      position: absolute;
+      transform: translate(-50%, -50%) translateZ(36px);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(11, 16, 27, 0.9);
+      border: 2px solid var(--gold);
+      color: var(--gold-soft);
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65), 0 0 0 5px rgba(224, 177, 114, 0.18);
+      transition: transform 0.3s var(--ease-spring), background 0.25s, color 0.25s;
+      z-index: 15;
+    }
+    .skp-pin:hover, .skp-pin.active-pin {
+      transform: translate(-50%, -50%) translateZ(48px) scale(1.18);
+      background: var(--gold);
+      color: #090d16;
+    }
+
+    /* Tarjeta flotante de información técnica del Pin */
+    .skp-pin-card {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      background: rgba(10, 15, 26, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(224, 177, 114, 0.38);
+      border-radius: 16px;
+      padding: 13px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      z-index: 18;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65);
+    }
+    .pin-card-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+    .pin-card-desc {
+      font-size: 0.82rem;
+      color: var(--text-body);
+    }
+    .pin-card-tag {
+      white-space: nowrap;
+      background: rgba(224, 177, 114, 0.16);
+      border: 1px solid rgba(224, 177, 114, 0.35);
+      color: var(--gold-soft);
+      font-size: 0.76rem;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pin-card-tag:hover {
+      background: var(--gold);
+      color: #090d16;
+    }
+
+    .bim-controls-bar {
+      padding: 14px 20px;
+      background: rgba(9, 14, 24, 0.96);
+      border-top: 1px solid rgba(255, 255, 255, 0.09);
+      display: grid;
+      grid-template-columns: 1.15fr 1fr 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .ctrl-group { display: flex; flex-direction: column; gap: 5px; }
+    .ctrl-group label {
+      font-size: 0.78rem;
+      color: var(--text-body);
+      display: flex;
+      justify-content: space-between;
+      font-weight: 500;
+    }
+    .ctrl-group input[type="range"] {
+      width: 100%;
+      accent-color: var(--gold);
+      cursor: pointer;
+      height: 5px;
+    }
+    .ctrl-group select {
+      background: rgba(18, 26, 42, 0.95);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 7px 10px;
+      font-size: 0.82rem;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* SECCIONES */
+    section.block-section { padding: 96px 0 24px; }
+    .section-head {
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto 52px;
+    }
+    .section-head h2 {
+      font-size: clamp(1.85rem, 3.3vw, 2.85rem);
+      font-weight: 600;
+      margin-bottom: 14px;
+      letter-spacing: -0.015em;
+      line-height: 1.2;
+    }
+    .section-head h2 em {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 400;
+      color: var(--gold-soft);
+    }
+    .section-head p {
+      color: var(--text-body);
+      font-size: 1.05rem;
+      line-height: 1.75;
+    }
+
+    /* GALERÍA 3D */
+    .filter-bar {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+    .filter-btn {
+      background: rgba(18, 26, 42, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-body);
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.35s var(--ease-out-expo);
+    }
+    .filter-btn.active, .filter-btn:hover {
+      background: rgba(224, 177, 114, 0.18);
+      border-color: var(--gold);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .renders-showcase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 30px;
+      perspective: 1400px;
+    }
+
+    .render-card-3d {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 24px;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      will-change: transform;
+      cursor: pointer;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+      transition: border-color 0.4s ease, box-shadow 0.4s ease, opacity 0.25s ease;
+    }
+    .render-card-3d:hover {
+      border-color: rgba(224, 177, 114, 0.5);
+      box-shadow: 0 28px 65px rgba(0, 0, 0, 0.65);
+    }
+
+    .render-img-wrap { position: relative; height: 265px; overflow: hidden; }
+    .render-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.9s var(--ease-out-expo);
+    }
+    .render-card-3d:hover .render-img-wrap img { transform: scale(1.07); }
+
+    .render-badge-top {
+      position: absolute;
+      top: 16px; left: 16px;
+      background: rgba(10, 15, 26, 0.78);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--gold-soft);
+      font-size: 0.78rem;
+      padding: 5px 13px;
+      border-radius: 999px;
+      font-weight: 500;
+    }
+
+    .render-zoom-pill {
+      position: absolute;
+      top: 16px; right: 16px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #0b0f17;
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 999px;
+      opacity: 0.9;
+      transition: transform 0.3s var(--ease-spring), opacity 0.3s;
+    }
+    .render-card-3d:hover .render-zoom-pill { transform: scale(1.06); opacity: 1; }
+
+    .render-card-body { padding: 24px 26px 26px; transform: translateZ(20px); }
+    .render-card-body h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+    }
+    .render-card-body p {
+      color: var(--text-body);
+      font-size: 0.94rem;
+      line-height: 1.68;
+      margin-bottom: 18px;
+    }
+
+    .render-specs-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      border-top: 1px solid var(--border-soft);
+      padding-top: 14px;
+      font-size: 0.82rem;
+    }
+    .spec-item span { display: block; color: var(--text-muted); font-size: 0.74rem; margin-bottom: 2px; }
+    .spec-item strong { color: var(--gold-soft); font-weight: 600; }
+
+    /* COMPARADOR INTERACTIVO ANTES / DESPUÉS */
+    .blueprint-render-wrap {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-soft);
+      border-radius: 26px;
+      padding: 28px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55);
+    }
+    .compare-mode-selector {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .compare-viewport {
+      position: relative;
+      width: 100%;
+      height: 510px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      user-select: none;
+      cursor: ew-resize;
+      touch-action: pan-y;
+    }
+    .compare-layer-img {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+    #compare-left-clip {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      clip-path: inset(0 50% 0 0);
+      pointer-events: none;
+    }
+    .compare-slider-line {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 50%;
+      width: 2.5px;
+      background: var(--gold);
+      box-shadow: 0 0 18px rgba(224, 177, 114, 0.9);
+      pointer-events: none;
+      z-index: 10;
+    }
+    .compare-handle {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: rgba(11, 16, 27, 0.92);
+      border: 2px solid var(--gold);
+      color: var(--gold-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.7);
+      pointer-events: none;
+      font-size: 1.05rem;
+      z-index: 11;
+      transition: transform 0.25s var(--ease-spring);
+    }
+    .compare-viewport:hover .compare-handle {
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+    .compare-labels {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      font-size: 0.88rem;
+      color: var(--text-body);
+      font-weight: 500;
+    }
+
+    /* SERVICIOS */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 26px;
+      perspective: 1200px;
+    }
+    .tilt-card {
+      position: relative;
+      background: linear-gradient(165deg, rgba(22, 32, 52, 0.75), rgba(12, 18, 30, 0.88));
+      border: 1px solid var(--border-soft);
+      border-radius: 24px;
+      padding: 30px;
+      transform-style: preserve-3d;
+      will-change: transform;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.35s ease, box-shadow 0.35s ease;
+    }
+    .tilt-card:hover {
+      border-color: rgba(224, 177, 114, 0.45);
+      box-shadow: 0 24px 52px rgba(0, 0, 0, 0.55);
+    }
+    .tilt-glare {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 50%, rgba(224, 177, 114, 0.14), transparent 65%);
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+    .tilt-card:hover .tilt-glare { opacity: 1; }
+    .service-icon-3d {
+      width: 54px; height: 54px;
+      border-radius: 16px;
+      background: rgba(224, 177, 114, 0.12);
+      border: 1px solid rgba(224, 177, 114, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      transform: translateZ(28px);
+      font-size: 1.45rem;
+    }
+    .tilt-card h3 {
+      font-size: 1.24rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text-main);
+      transform: translateZ(22px);
+    }
+    .tilt-card p {
+      color: var(--text-body);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: 18px;
+      transform: translateZ(16px);
+    }
+    .service-tags { display: flex; flex-wrap: wrap; gap: 8px; transform: translateZ(20px); }
+    .service-tag {
+      font-size: 0.78rem;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--gold-soft);
+    }
+
+    /* CRONOGRAMA INTERACTIVO */
+    .pm-dashboard {
+      display: grid;
+      grid-template-columns: 1.32fr 0.88fr;
+      gap: 28px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-soft);
+      border-radius: 26px;
+      padding: 30px;
+    }
+    .pm-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .gantt-list { display: flex; flex-direction: column; gap: 12px; }
+    .gantt-row {
+      display: grid;
+      grid-template-columns: 205px 1fr 72px;
+      align-items: center;
+      gap: 14px;
+      padding: 11px 16px;
+      border-radius: 14px;
+      background: rgba(15, 22, 36, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+      transition: all 0.3s var(--ease-out-expo);
+    }
+    .gantt-row:hover, .gantt-row.active {
+      border-color: var(--gold);
+      background: rgba(224, 177, 114, 0.11);
+      transform: translateX(4px);
+    }
+    .gantt-phase-name { font-size: 0.9rem; font-weight: 500; color: var(--text-main); }
+    .gantt-track {
+      width: 100%; height: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      position: relative;
+      overflow: hidden;
+    }
+    .gantt-bar {
+      position: absolute;
+      top: 0; bottom: 0;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--gold), var(--sky));
+      box-shadow: 0 0 14px rgba(224, 177, 114, 0.4);
+      transition: all 0.6s var(--ease-out-expo);
+    }
+    .gantt-weeks { font-size: 0.84rem; text-align: right; color: var(--gold-soft); font-weight: 500; }
+    .pm-side-panel { display: flex; flex-direction: column; gap: 18px; }
+    .scurve-card {
+      background: rgba(9, 14, 24, 0.85);
+      border: 1px solid var(--border-soft);
+      border-radius: 18px;
+      padding: 18px;
+    }
+    #scurve-canvas { width: 100%; height: 180px; display: block; }
+    .phase-detail-box {
+      background: rgba(224, 177, 114, 0.08);
+      border: 1px solid rgba(224, 177, 114, 0.28);
+      border-radius: 18px;
+      padding: 20px;
+      transition: all 0.35s ease;
+    }
+    .phase-detail-box h4 { color: var(--gold-soft); font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; }
+    .phase-detail-box p { font-size: 0.92rem; color: var(--text-body); margin-bottom: 12px; line-height: 1.65; }
+
+    /* COTIZADOR */
+    .estimator-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 30px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-soft);
+      border-radius: 26px;
+      padding: 34px;
+    }
+    .check-pills {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 16px 0 26px;
+    }
+    .service-Toggle {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 16px;
+      border-radius: 14px;
+      background: rgba(15, 23, 38, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: all 0.25s var(--ease-out-expo);
+      user-select: none;
+    }
+    .service-Toggle:hover { border-color: rgba(224, 177, 114, 0.4); }
+    .service-Toggle.selected {
+      background: rgba(224, 177, 114, 0.15);
+      border-color: var(--gold);
+      color: #fff;
+    }
+    .service-Toggle input { accent-color: var(--gold); width: 17px; height: 17px; flex-shrink: 0; cursor: pointer; }
+    .summary-receipt {
+      background: linear-gradient(165deg, rgba(11, 17, 29, 0.96), rgba(18, 28, 46, 0.92));
+      border: 1px solid rgba(224, 177, 114, 0.35);
+      border-radius: 22px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .price-big {
+      font-family: var(--font-serif);
+      font-size: 2.5rem;
+      font-weight: 400;
+      color: var(--gold-soft);
+      margin: 8px 0;
+    }
+    .deliverable-list {
+      list-style: none;
+      margin: 16px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 0.92rem;
+      color: var(--text-body);
+    }
+    .deliverable-list li::before {
+      content: "✓ ";
+      color: var(--sage);
+      font-weight: 600;
+    }
+
+    /* LIGHTBOX DE RENDERS */
+    #render-lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 8, 15, 0.92);
+      backdrop-filter: blur(18px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2500;
+      padding: 24px;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+    #render-lightbox.open { display: flex; opacity: 1; }
+    .lightbox-card {
+      max-width: 1080px;
+      width: 100%;
+      max-height: 92vh;
+      overflow-y: auto;
+      background: #0d1422;
+      border: 1px solid rgba(224, 177, 114, 0.45);
+      border-radius: 24px;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.8);
+      transform: scale(0.95);
+      transition: transform 0.4s var(--ease-spring);
+    }
+    #render-lightbox.open .lightbox-card { transform: scale(1); }
+    .lightbox-card img {
+      width: 100%;
+      max-height: 66vh;
+      object-fit: cover;
+      display: block;
+    }
+    .lightbox-meta {
+      padding: 22px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    /* MODAL */
+    #quote-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 8, 15, 0.85);
+      backdrop-filter: blur(14px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+    #quote-modal.open { display: flex; }
+    .modal-box {
+      background: #0f1726;
+      border: 1px solid var(--gold);
+      border-radius: 24px;
+      max-width: 540px;
+      width: 100%;
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 32px;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7);
+    }
+    .form-row { margin-bottom: 16px; }
+    .form-row label { display: block; font-size: 0.86rem; color: var(--text-body); margin-bottom: 6px; }
+    .form-row input, .form-row textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(8, 12, 20, 0.9);
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-row input:focus, .form-row textarea:focus {
+      border-color: var(--gold);
+    }
+
+    .reveal {
+      opacity: 0;
+      filter: blur(6px);
+      transform: translateY(32px);
+      transition: opacity 0.85s var(--ease-out-expo), filter 0.85s var(--ease-out-expo), transform 0.85s var(--ease-out-expo);
+    }
+    .reveal.visible {
+      opacity: 1;
+      filter: blur(0px);
+      transform: translateY(0);
+    }
+
+    footer {
+      border-top: 1px solid var(--border-soft);
+      padding: 42px 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      margin-top: 90px;
+      position: relative;
+      z-index: 2;
+    }
+
+    @media (max-width: 1040px) {
+      .hero-grid, .pm-dashboard, .estimator-grid { grid-template-columns: 1fr; }
+      .bim-controls-bar { grid-template-columns: 1fr; }
+      .compare-viewport { height: 370px; }
+      .renders-showcase-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+      .mobile-menu-btn { display: inline-flex; }
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: calc(100% + 10px);
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        gap: 6px;
+        background: rgba(11, 16, 27, 0.96);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(224, 177, 114, 0.3);
+        border-radius: 22px;
+        padding: 16px 20px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+      }
+      .nav-links.open { display: flex; }
+      .nav-links li a {
+        display: block;
+        padding: 8px 6px;
+        font-size: 0.96rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      header.navbar {
+        padding: 10px 16px;
+        width: 95vw;
+      }
+      .brand { font-size: 0.94rem; gap: 10px; }
+      .nav-cta { padding: 8px 14px; font-size: 0.8rem; }
+      .nav-cta .cta-long { display: none; }
+      main { padding: 98px 16px 60px; }
+      .skp-viewport { height: 380px; }
+      .skp-pin-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 14px;
+      }
+      .gantt-row {
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+      }
+      .gantt-track {
+        grid-column: 1 / -1;
+        order: 3;
+      }
+      .check-pills { grid-template-columns: 1fr; }
+      .estimator-grid, .pm-dashboard, .blueprint-render-wrap { padding: 20px; }
+      .compare-viewport { height: 290px; }
+      .renders-showcase-grid, .services-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="scroll-progress"></div>
+  <div id="cursor-aura"></div>
+  <canvas id="bg-ambient-canvas"></canvas>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <a href="#inicio" class="brand">
+      <div class="cube-wrap">
+        <div class="cube">
+          <div class="cube-face front"></div>
+          <div class="cube-face back"></div>
+          <div class="cube-face right"></div>
+          <div class="cube-face left"></div>
+          <div class="cube-face top"></div>
+          <div class="cube-face bottom"></div>
+        </div>
+      </div>
+      <span>Vértice <span class="brand-serif">Arquitectura &amp; Ingeniería</span></span>
+    </a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#visor3d" onclick="closeMobileMenu()">Modelos SketchUp / Revit</a></li>
+      <li><a href="#portafolio-renders" onclick="closeMobileMenu()">Proyectos y Renders</a></li>
+      <li><a href="#plano-render" onclick="closeMobileMenu()">Del Plano a la Realidad</a></li>
+      <li><a href="#servicios" onclick="closeMobileMenu()">Qué Hacemos</a></li>
+      <li><a href="#cronogramas" onclick="closeMobileMenu()">Tiempos y Obra</a></li>
+      <li><a href="#cotizador" onclick="closeMobileMenu()">Estimador</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="nav-cta" onclick="openQuoteModal()">Conversemos<span class="cta-long"> sobre tu proyecto</span> →</button>
+      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir menú de navegación" onclick="toggleMobileMenu()">☰</button>
+    </div>
+  </header>
+
+  <main id="inicio">
+    <!-- HERO SECTION CON VISOR INTERACTIVO SKETCHUP PRO / AUTODESK REVIT -->
+    <section class="hero-grid" id="visor3d">
+      <div>
+        <div class="eyebrow-pill">
+          <span class="dot"></span>
+          <span>Arquitectura, Ingeniería, Planos, Renders 3D y Dirección de Obra</span>
+        </div>
+        <h1 class="hero-title">
+          Damos forma a tus ideas, desde el <em>primer trazo</em> hasta la obra terminada
+        </h1>
+        <p class="hero-subtitle">
+          Acompañamos tu proyecto de principio a fin: diseñamos espacios pensados para disfrutarse, calculamos una ingeniería segura, dibujamos planos claros para construir sin improvisaciones y modelamos cada detalle en SketchUp y Revit antes de colocar el primer bloque.
+        </p>
+        <div class="hero-actions">
+          <a href="#portafolio-renders" class="btn-primary">Explorar Proyectos en 3D</a>
+          <a href="#cotizador" class="btn-secondary">Calcular mi Proyecto</a>
+        </div>
+
+        <div class="hero-strip-label">
+          Selecciona un proyecto para explorar su maqueta SketchUp / Revit y su Render 8K:
+        </div>
+        <div class="hero-render-strip">
+          <div class="mini-render-card active-thumb" id="thumb-villa" onclick="selectHeroProject('villa')">
+            <img src="assets/img/skp-villa.jpg" alt="Maqueta SketchUp Casa Residencial" />
+            <span>Casa Residencial</span>
+          </div>
+          <div class="mini-render-card" id="thumb-tower" onclick="selectHeroProject('tower')">
+            <img src="assets/img/skp-tower.jpg" alt="Maqueta Revit Torre Corporativa" />
+            <span>Torre de Uso Mixto</span>
+          </div>
+          <div class="mini-render-card" id="thumb-industrial" onclick="selectHeroProject('industrial')">
+            <img src="assets/img/skp-industrial.jpg" alt="Maqueta Revit Complejo Industrial" />
+            <span>Nave y Oficinas</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESTUDIO INTERACTIVO SKETCHUP PRO / REVIT BIM + RENDER 8K -->
+      <div class="bim-studio-card">
+        <div class="bim-topbar">
+          <div class="bim-app-title">
+            <span class="bim-app-badge">SKETCHUP + REVIT 3D</span>
+            <span id="studio-project-label">Residencia Horizon — Ejes A–D / 1–4 (SketchUp + Revit)</span>
+          </div>
+          <div class="mode-pills">
+            <button class="mode-btn active" id="mode-btn-sketchup" onclick="setStudioViewMode('sketchup', this)">Maqueta SketchUp / Revit</button>
+            <button class="mode-btn" id="mode-btn-split" onclick="setStudioViewMode('split', this)">Maqueta ↔ Render 8K</button>
+            <button class="mode-btn" id="mode-btn-render" onclick="setStudioViewMode('render', this)">Render Fotorrealista</button>
+            <button class="mode-btn" id="mode-btn-cad" onclick="setStudioViewMode('cad', this)">Estilo Línea Técnica</button>
+          </div>
+        </div>
+
+        <div class="skp-viewport" id="skp-viewport">
+          <div class="skp-stage-3d" id="skp-stage">
+            <!-- Imagen base: Modelo 3D SketchUp / Revit real -->
+            <img id="hero-skp-img" class="skp-layer-img" src="assets/img/skp-villa.jpg" alt="Modelo 3D SketchUp y Revit" />
+
+            <!-- Capa superpuesta: Render 8K Fotorrealista (para modo Render o modo Split) -->
+            <div id="hero-render-overlay">
+              <img id="hero-render-img" class="skp-layer-img" src="assets/img/villa.jpg" alt="Render 8K Fotorrealista" />
+            </div>
+
+            <!-- Divisor interactivo cuando está en modo Maqueta ↔ Render -->
+            <div id="hero-split-bar">
+              <div id="hero-split-knob">↔</div>
+            </div>
+
+            <!-- Pines interactivos 3D sobre elementos constructivos de la maqueta -->
+            <div id="skp-pins-layer"></div>
+          </div>
+
+          <!-- Tarjeta inferior con detalle del punto seleccionado en la maqueta -->
+          <div class="skp-pin-card">
+            <div>
+              <div class="pin-card-title" id="pin-title">Voladizo Estructural y Alero en Cedro</div>
+              <div class="pin-card-desc" id="pin-desc">Estructura oculta en acero y concreto calculada para volar sobre la terraza sin columnas intermedias.</div>
+            </div>
+            <span class="pin-card-tag" onclick="openCurrentHeroLightbox()">⤢ Ver en pantalla completa</span>
+          </div>
+        </div>
+
+        <div class="bim-controls-bar">
+          <div class="ctrl-group">
+            <label for="building-type"><span>Tipología en el visor</span></label>
+            <select id="building-type" onchange="selectHeroProject(this.value)">
+              <option value="villa" selected>Casa: Residencia Horizon (SketchUp + Ejes)</option>
+              <option value="tower">Edificio: Torre Vértice (Revit Estructura)</option>
+              <option value="industrial">General: Complejo Industrial (Cerchas + Solar)</option>
+            </select>
+          </div>
+          <div class="ctrl-group">
+            <label for="zoom-slider"><span>Acercamiento de cámara (Zoom 3D)</span><span id="zoom-val">100%</span></label>
+            <input type="range" id="zoom-slider" min="100" max="165" value="100" oninput="updateStudioZoom(this.value)" />
+          </div>
+          <div class="ctrl-group">
+            <label for="blend-slider"><span>Transición Maqueta → Render 8K</span><span id="blend-val">0%</span></label>
+            <input type="range" id="blend-slider" min="0" max="100" value="0" oninput="updateStudioBlend(this.value)" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PORTAFOLIO DE PROYECTOS: MAQUETAS SKETCHUP/REVIT Y RENDERS 8K -->
+    <section class="block-section reveal" id="portafolio-renders">
+      <div class="section-head">
+        <div class="eyebrow-pill"><span class="dot"></span><span>Portafolio de Modelado 3D y Visualización</span></div>
+        <h2>Desde el modelo en <em>SketchUp y Revit</em> hasta el render final</h2>
+        <p>Trabajamos cada proyecto con maquetas digitales precisas, ejes constructivos claros y renders realistas para que conozcas tu obra al detalle antes de construirla.</p>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterPortfolio('all', this)">Todos los proyectos (9)</button>
+        <button class="filter-btn" onclick="filterPortfolio('skp', this)">Modelos SketchUp y Revit</button>
+        <button class="filter-btn" onclick="filterPortfolio('casas', this)">Casas y Residencias</button>
+        <button class="filter-btn" onclick="filterPortfolio('edificios', this)">Edificios y Torres</button>
+        <button class="filter-btn" onclick="filterPortfolio('general', this)">Proyectos Comerciales e Industria</button>
+      </div>
+
+      <div class="renders-showcase-grid" id="portfolio-grid">
+        <!-- 1. Maqueta SketchUp Casa -->
+        <article class="render-card-3d smooth-tilt" data-cat="skp casas" onclick="openLightbox('skp_villa')">
+          <div class="render-img-wrap">
+            <img src="assets/img/skp-villa.jpg" loading="lazy" decoding="async" alt="Modelo SketchUp Pro Casa Residencial" />
+            <span class="render-badge-top">Modelo SketchUp + Ejes Revit</span>
+            <span class="render-zoom-pill">⤢ Ampliar maqueta</span>
+          </div>
+          <div class="render-card-body">
+            <h3>Maqueta 3D Residencia Horizon — Volumetría, Sombras y Ejes</h3>
+            <p>Modelo tridimensional desarrollado en SketchUp y Revit con ejes constructivos A–D y 1–4, pérgola de madera, escalera exterior, ventanería modulada y piscina en corte.</p>
+            <div class="render-specs-row">
+              <div class="spec-item"><span>Software</span><strong>SketchUp + Revit</strong></div>
+              <div class="spec-item"><span>Ejes</span><strong>Acotados en Planta</strong></div>
+              <div class="spec-item"><span>Sombras</span><strong>Estudio Solar Real</strong></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 2. Render Casa -->
+        <article class="render-card-3d smooth-tilt" data-cat="casas" onclick="openLightbox('villa')">
+          <div class="render-img-wrap">
+            <img src="assets/img/villa.jpg" loading="lazy" decoding="async" alt="Render Final Casa Residencial Horizon" />
+            <span class="render-badge-top">Render Exterior 8K</span>
+            <span class="render-zoom-pill">⤢ Ampliar render</span>
+          </div>
+          <div class="render-card-body">
+            <h3>Residencia Horizon — Acabado Final e Iluminación Nocturna</h3>
+            <p>Resultado fotorrealista del modelo residencial con concreto visto, plafones cálidos en madera de cedro, iluminación arquitectónica e integración con el jardín y el agua.</p>
+            <div class="render-specs-row">
+              <div class="spec-item"><span>Superficie</span><strong>485 m²</strong></div>
+              <div class="spec-item"><span>Estructura</span><strong>Acero y Concreto</strong></div>
+              <div class="spec-item"><span>Alcance</span><strong>Diseño + Planos + 3D</strong></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 3. Maqueta Revit Torre -->
+        <article class="render-card-3d smooth-tilt" data-cat="skp edificios" onclick="openLightbox('skp_tower')">
+          <div class="render-img-wrap">
+            <img src="assets/img/skp-tower.jpg" loading="lazy" decoding="async" alt="Modelo Revit BIM Torre de Uso Mixto" />
+            <span class="render-badge-top">Modelo Estructural Revit BIM</span>
+            <span class="render-zoom-pill">⤢ Ampliar maqueta</span>
+          </div>
+          <div class="render-card-body">
+            <h3>Maqueta BIM Torre Vértice — Núcleo Sísmico y Terrazas</h3>
+            <p>Modelado integral de estructura metálica arriostrada, núcleo de ascensores en concreto, modulación de fachada de vidrio, terrazas ajardinadas y plaza peatonal con ejes.</p>
+            <div class="render-specs-row">
+              <div class="spec-item"><span>Disciplinas</span><strong>Arq + Estructura</strong></div>
+              <div class="spec-item"><span>Precisión</span><strong>BIM LOD 400</strong></div>
+              <div class="spec-item"><span>Cómputos</span><strong>Acero y Concreto</strong></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 4. Render Torre -->
+        <article class="render-card-3d smooth-tilt" data-cat="edificios" onclick="openLightbox('tower')">
+          <div class="render-img-wrap">
+            <img src="assets/img/tower.jpg" loading="lazy" decoding="async" alt="Torre Vértice Uso Mixto Render" />
+            <span class="render-badge-top">Edificio Corporativo y Residencial</span>
+            <span class="render-zoom-pill">⤢ Ampliar render</span>
+          </div>
+          <div class="render-card-body">
+            <h3>Torre Vértice — Oficinas, Apartamentos y Plaza Urbana</h3>
+            <p>Visualización fotorrealista al atardecer mostrando la transparencia de los niveles comerciales, las terrazas verdes en altura y los espejos de agua a nivel peatonal.</p>
+            <div class="render-specs-row">
+              <div class="spec-item"><span>Superficie</span><strong>14,200 m²</strong></div>
+              <div class="spec-item"><span>Coordinación</span><strong>Modelado BIM 3D</strong></div>
+              <div class="spec-item"><span>Planificación</span><strong>28 meses de obra</strong></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 5. Maqueta Revit Complejo Industrial -->
+        <article class="render-card-3d smooth-tilt" data-cat="skp general" onclick="openLightbox('skp_industrial')">
+          <div class="render-img-wrap">
+            <img src="assets/img/skp-industrial.jpg" loading="lazy" decoding="async" alt="Maqueta Revit Complejo Industrial y Logístico" />
+            <span class="render-badge-top">Modelo Revit Civil e Industrial</span>
+            <span class="render-zoom-pill">⤢ Ampliar maqueta</span>
+          </div>
+          <div class="render-card-body">
+            <h3>Maqueta 3D Industrial — Cerchas Metálicas, Muelles y Vialidad</h3>
+            <p>Modelo técnico con corte demostrativo de las cerchas de cubierta metálica, puente conector acristalado, edificio de oficinas, andenes para camiones y estacionamientos.</p>
+            <div class="render-specs-row">
+              <div class="spec-item"><span>Estructura</span><strong>Cerchas de Gran Luz</strong></div>
+              <div class="spec-item"><span>Logística</span><strong>Andenes y Radios Giro</strong></div>
+              <div class="spec-item"><span>Energía</span><strong>Cubierta Solar</strong></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 6. Render Complejo Industrial -->
+        <article class="render-card-3d smooth-tilt" data-cat="general" onclick="openLightbox('industrial')">
+          <div class="render-img-wrap">
+            <img src="assets/img/industrial.jpg" loading="lazy" decoding="async" alt="Complejo Empresarial y Logístico" />
+            <span class="render-badge-top">Complejo Empresarial e Industrial</span>
+            <span class="render-zoom-pill">⤢ Ampliar render</span>
+          </div>
+          <div class="render-card-body">
+            <h3>Parque Empresarial y Centro Logístico Sostenible</h3>
+            <p>Vista aérea terminada del conjunto industrial y corporativo con áreas verdes, laguna de retención pluvial, paneles fotovoltaicos y vialidad ejecutada.</p>
+            <div class="render-specs-row">
+              <div class="spec-item"><span>Conjunto</span><strong>28,500 m²</strong></div>
+              <div class="spec-item"><span>Especialidad</span><strong>Civil + Industrial</strong></div>
+              <div class="spec-item"><span>Gestión</span><strong>Control de Costos</strong></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 7. Corte BIM Instalaciones -->
+        <article class="render-card-3d smooth-tilt" data-cat="skp edificios" onclick="openLightbox('bim_cutaway')">
+          <div class="render-img-wrap">
+            <img src="assets/img/bim-cutaway.jpg" loading="lazy" decoding="async" alt="Coordinación de Estructura e Instalaciones en 3D" />
+            <span class="render-badge-top">Ingeniería y Estructura 3D</span>
+            <span class="render-zoom-pill">⤢ Ampliar imagen</span>
+          </div>
+          <div class="render-card-body">
+            <h3>Ingeniería Coordinada — Estructura, Tuberías y Acabados</h3>
+            <p>Antes de construir, unimos en un solo modelo 3D los cimientos, las vigas, el aire acondicionado y las redes eléctricas para evitar errores o gastos imprevistos en obra.</p>
+            <div class="render-specs-row">
+              <div class="spec-item"><span>Beneficio</span><strong>Cero Choques en Obra</strong></div>
+              <div class="spec-item"><span>Presupuesto</span><strong>Cantidades Exactas</strong></div>
+              <div class="spec-item"><span>Seguridad</span><strong>Cálculo Sísmico</strong></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 8. Planos Isométricos -->
+        <article class="render-card-3d smooth-tilt" data-cat="skp casas" onclick="openLightbox('blueprint_iso')">
+          <div class="render-img-wrap">
+            <img src="assets/img/blueprint-iso.jpg" loading="lazy" decoding="async" alt="Planos Constructivos y Vistas Isométricas" />
+            <span class="render-badge-top">Diseño de Planos 3D</span>
+            <span class="render-zoom-pill">⤢ Ampliar plano</span>
+          </div>
+          <div class="render-card-body">
+            <h3>Planos Constructivos Claros y Vistas en 3D por Planta</h3>
+            <p>Además de los planos técnicos para permisos y maestros de obra, preparamos cortes en tres dimensiones para que entiendas fácilmente cada habitación y distribución.</p>
+            <div class="render-specs-row">
+              <div class="spec-item"><span>Contenido</span><strong>Arquitectura + Redes</strong></div>
+              <div class="spec-item"><span>Entrega</span><strong>Digital e Impreso</strong></div>
+              <div class="spec-item"><span>Trámites</span><strong>Listo para Permisos</strong></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 9. Interiorismo -->
+        <article class="render-card-3d smooth-tilt" data-cat="casas edificios" onclick="openLightbox('interior')">
+          <div class="render-img-wrap">
+            <img src="assets/img/interior.jpg" loading="lazy" decoding="async" alt="Diseño Interior en Doble Altura" />
+            <span class="render-badge-top">Arquitectura Interior</span>
+            <span class="render-zoom-pill">⤢ Ampliar render</span>
+          </div>
+          <div class="render-card-body">
+            <h3>Espacios Interiores en Doble Altura e Iluminación Cálida</h3>
+            <p>Cuidamos la calidez de cada ambiente: diseñamos escaleras ligeras, seleccionamos maderas, piedras naturales e iluminación indirecta para que cada espacio inspire tranquilidad.</p>
+            <div class="render-specs-row">
+              <div class="spec-item"><span>Ambiente</span><strong>Luz Natural y Cálida</strong></div>
+              <div class="spec-item"><span>Materiales</span><strong>Mármol, Roble y Acero</strong></div>
+              <div class="spec-item"><span>Experiencia</span><strong>Recorrido Virtual</strong></div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- COMPARADOR INTERACTIVO DE MAQUETA SKETCHUP/REVIT A RENDER REAL -->
+    <section class="block-section reveal" id="plano-render">
+      <div class="section-head">
+        <div class="eyebrow-pill"><span class="dot"></span><span>Comparador Interactivo en Tiempo Real</span></div>
+        <h2>De la maqueta en <em>SketchUp y Revit</em> a la realidad</h2>
+        <p>Desliza el control central o activa el recorrido automático para comparar nuestros modelos técnicos 3D con el render fotorrealista terminado.</p>
+      </div>
+
+      <div class="blueprint-render-wrap">
+        <div class="compare-mode-selector">
+          <div style="font-size:0.95rem;color:var(--text-body);">
+            <strong style="color:var(--text-main);">Comparación activa:</strong> <span id="compare-scene-title">Casa Residencial (Maqueta SketchUp 3D vs. Render Final)</span>
+          </div>
+          <div class="mode-pills">
+            <button class="mode-btn active" onclick="setComparePair('villa_skp', this)">Casa (SketchUp ↔ Render)</button>
+            <button class="mode-btn" onclick="setComparePair('tower_skp', this)">Torre (Revit ↔ Render)</button>
+            <button class="mode-btn" onclick="setComparePair('ind_skp', this)">Industrial (Revit ↔ Render)</button>
+            <button class="mode-btn" onclick="setComparePair('villa_cad', this)">Plano CAD 3D ↔ Render</button>
+            <button class="mode-btn" id="auto-sweep-btn" onclick="toggleAutoSweep(this)">▶ Barrido Automático</button>
+          </div>
+        </div>
+
+        <div class="compare-viewport" id="compare-box">
+          <img id="compare-right-img" class="compare-layer-img" src="assets/img/villa.jpg" loading="lazy" decoding="async" alt="Render Final" />
+          <div id="compare-left-clip">
+            <img id="compare-left-img" class="compare-layer-img" src="assets/img/skp-villa.jpg" loading="lazy" decoding="async" alt="Maqueta SketchUp / Revit" />
+          </div>
+          <div class="compare-slider-line" id="compare-line"></div>
+          <div class="compare-handle" id="compare-handle">↔</div>
+        </div>
+
+        <div class="compare-labels">
+          <span style="color:var(--sky);">← Maqueta Técnica 3D (SketchUp / Revit / Planos)</span>
+          <span style="color:var(--gold-soft);">Render Arquitectónico Terminado →</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUÉ HACEMOS -->
+    <section class="block-section reveal" id="servicios">
+      <div class="section-head">
+        <div class="eyebrow-pill"><span class="dot"></span><span>Nuestras Especialidades</span></div>
+        <h2>Todo lo que tu proyecto necesita, <em>en un solo equipo</em></h2>
+        <p>Nos encargamos de coordinar el diseño, los planos, la ingeniería y la supervisión para que disfrutes el proceso sin estrés ni contratiempos.</p>
+      </div>
+
+      <div class="services-grid">
+        <div class="tilt-card smooth-tilt">
+          <div class="tilt-glare"></div>
+          <div class="service-icon-3d">📐</div>
+          <h3>Diseño Arquitectónico a tu Medida</h3>
+          <p>Escuchamos cómo quieres vivir o trabajar y diseñamos espacios que aprovechan la luz natural, la ventilación y cada rincón de tu terreno con elegancia y sentido práctico.</p>
+          <div class="service-tags">
+            <span class="service-tag">Casas y Edificios</span>
+            <span class="service-tag">Luz y Ventilación Natural</span>
+            <span class="service-tag">Distribución Inteligente</span>
+          </div>
+        </div>
+
+        <div class="tilt-card smooth-tilt">
+          <div class="tilt-glare"></div>
+          <div class="service-icon-3d">🏗️</div>
+          <h3>Ingeniería Estructural e Instalaciones</h3>
+          <p>Calculamos cimientos y estructuras seguras en concreto o acero, junto con todas las redes eléctricas, sanitarias, pluviales y de climatización bien pensadas desde el inicio.</p>
+          <div class="service-tags">
+            <span class="service-tag">Cálculo Estructural</span>
+            <span class="service-tag">Redes Eléctricas y Agua</span>
+            <span class="service-tag">Seguridad Sísmica</span>
+          </div>
+        </div>
+
+        <div class="tilt-card smooth-tilt">
+          <div class="tilt-glare"></div>
+          <div class="service-icon-3d">🗺️</div>
+          <h3>Diseño de Planos y Permisos</h3>
+          <p>Preparamos juegos de planos claros, completos y bien acotados tanto para obtener tus permisos municipales sin demoras como para que el equipo en obra construya con exactitud.</p>
+          <div class="service-tags">
+            <span class="service-tag">Planos Constructivos</span>
+            <span class="service-tag">Detalles de Obra</span>
+            <span class="service-tag">Gestión de Permisos</span>
+          </div>
+        </div>
+
+        <div class="tilt-card smooth-tilt">
+          <div class="tilt-glare"></div>
+          <div class="service-icon-3d">🧊</div>
+          <h3>Modelado 3D en SketchUp y Revit</h3>
+          <p>Levantamos tu proyecto completo en maquetas digitales detalladas para revisar alturas, estructuras y tuberías antes de ir al terreno, logrando cómputos exactos y cero sorpresas.</p>
+          <div class="service-tags">
+            <span class="service-tag">Maqueta SketchUp / Revit</span>
+            <span class="service-tag">Cómputo de Materiales</span>
+            <span class="service-tag">Revisión Previa</span>
+          </div>
+        </div>
+
+        <div class="tilt-card smooth-tilt">
+          <div class="tilt-glare"></div>
+          <div class="service-icon-3d">✨</div>
+          <h3>Renders Realistas y Recorridos</h3>
+          <p>Creamos imágenes y vistas 360° con materiales, texturas e iluminación real para que elijas acabados con seguridad o presentes tu proyecto a clientes e inversionistas.</p>
+          <div class="service-tags">
+            <span class="service-tag">Exteriores e Interiores</span>
+            <span class="service-tag">Iluminación Real</span>
+            <span class="service-tag">Presentación Comercial</span>
+          </div>
+        </div>
+
+        <div class="tilt-card smooth-tilt">
+          <div class="tilt-glare"></div>
+          <div class="service-icon-3d">📊</div>
+          <h3>Cronogramas y Dirección de Proyectos</h3>
+          <p>Organizamos cada etapa de la construcción en un calendario claro, cuidamos tus compras y supervisamos el avance semanal en campo para cumplir con los plazos y el presupuesto.</p>
+          <div class="service-tags">
+            <span class="service-tag">Calendario de Obra</span>
+            <span class="service-tag">Control de Presupuesto</span>
+            <span class="service-tag">Supervisión en Sitio</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CRONOGRAMAS Y MANEJO DE PROYECTOS -->
+    <section class="block-section reveal" id="cronogramas">
+      <div class="section-head">
+        <div class="eyebrow-pill"><span class="dot"></span><span>Orden, Tiempos y Presupuesto</span></div>
+        <h2>Así planificamos y cuidamos el <em>avance de tu obra</em></h2>
+        <p>Toca cualquier etapa del calendario para conocer qué entregamos en cada paso y cómo mantenemos bajo control los tiempos y la inversión.</p>
+      </div>
+
+      <div class="pm-dashboard">
+        <div>
+          <div class="pm-toolbar">
+            <div>
+              <strong style="font-size:1.08rem;font-weight:600;">Etapas del Proyecto Paso a Paso</strong>
+              <div style="font-size:0.85rem;color:var(--text-muted);">Selecciona una fase para ver sus actividades y resultados</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="mode-btn active" onclick="setScheduleScale(1, this)">Casa (24 sem)</button>
+              <button class="mode-btn" onclick="setScheduleScale(1.5, this)">Edificio (36 sem)</button>
+              <button class="mode-btn" onclick="setScheduleScale(2.0, this)">Nave / Complejo (48 sem)</button>
+            </div>
+          </div>
+          <div class="gantt-list" id="gantt-container"></div>
+        </div>
+
+        <div class="pm-side-panel">
+          <div class="scurve-card">
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:8px;font-weight:500;flex-wrap:wrap;gap:8px;">
+              <span style="color:var(--sky);">━ Avance Programado de Obra</span>
+              <span style="color:var(--gold-soft);">━ Ritmo de Inversión Cuidada</span>
+            </div>
+            <canvas id="scurve-canvas"></canvas>
+          </div>
+
+          <div class="phase-detail-box" id="phase-detail">
+            <h4 id="detail-title">1. Ideas y Maqueta SketchUp 3D</h4>
+            <p id="detail-desc">Conocemos tu terreno y tus necesidades, planteamos la distribución ideal y levantamos el modelo en SketchUp y Revit para que sientas las proporciones reales del proyecto.</p>
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:0.82rem;color:var(--text-main);border-top:1px solid rgba(255,255,255,0.1);padding-top:10px;font-weight:500;">
+              <span id="detail-deliverable">Recibes: Maqueta 3D + Distribución</span>
+              <span id="detail-kpi" style="color:var(--sage);">Meta: Diseño a tu gusto</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ESTIMADOR INTERACTIVO -->
+    <section class="block-section reveal" id="cotizador">
+      <div class="section-head">
+        <div class="eyebrow-pill"><span class="dot"></span><span>Calculadora Interactiva</span></div>
+        <h2>Arma tu paquete a medida y <em>estima tu inversión</em></h2>
+        <p>Marca las áreas en las que te gustaría nuestro apoyo, indica el tamaño aproximado de tu proyecto y revisa al instante qué incluye y cuánto tiempo tomará diseñarlo.</p>
+      </div>
+
+      <div class="estimator-grid">
+        <div>
+          <h3 style="font-weight:600;margin-bottom:6px;">1. ¿En qué etapas te acompañamos?</h3>
+          <div class="check-pills" id="service-checkboxes">
+            <label class="service-Toggle selected">
+              <input type="checkbox" checked onchange="toggleServicePill(this)" />
+              <span>Diseño Arquitectónico</span>
+            </label>
+            <label class="service-Toggle selected">
+              <input type="checkbox" checked onchange="toggleServicePill(this)" />
+              <span>Diseño de Planos Constructivos</span>
+            </label>
+            <label class="service-Toggle selected">
+              <input type="checkbox" checked onchange="toggleServicePill(this)" />
+              <span>Ingeniería Estructural y Redes</span>
+            </label>
+            <label class="service-Toggle selected">
+              <input type="checkbox" checked onchange="toggleServicePill(this)" />
+              <span>Maqueta SketchUp/Revit + Renders</span>
+            </label>
+            <label class="service-Toggle">
+              <input type="checkbox" onchange="toggleServicePill(this)" />
+              <span>Cronograma y Presupuesto de Obra</span>
+            </label>
+            <label class="service-Toggle">
+              <input type="checkbox" onchange="toggleServicePill(this)" />
+              <span>Dirección y Supervisión de Obra</span>
+            </label>
+          </div>
+
+          <div style="margin-bottom:22px;">
+            <div style="display:flex;justify-content:space-between;font-weight:500;margin-bottom:8px;">
+              <label for="area-slider">2. Tamaño aproximado del proyecto</label>
+              <span style="color:var(--gold-soft);font-weight:600;" id="area-label">300 m²</span>
+            </div>
+            <input type="range" id="area-slider" min="60" max="3000" step="20" value="300" style="width:100%;accent-color:var(--gold);cursor:pointer;" oninput="recalcQuote()" />
+          </div>
+
+          <div>
+            <div style="display:flex;justify-content:space-between;font-weight:500;margin-bottom:8px;">
+              <label for="complex-slider">3. Nivel de detalle y acabados</label>
+              <span style="color:var(--sky);font-weight:600;" id="complex-label">Residencial / Comercial Completo</span>
+            </div>
+            <input type="range" id="complex-slider" min="1" max="3" step="1" value="2" style="width:100%;accent-color:var(--sky);cursor:pointer;" oninput="recalcQuote()" />
+          </div>
+        </div>
+
+        <div class="summary-receipt">
+          <div>
+            <div style="font-size:0.82rem;color:var(--gold-soft);font-weight:500;">Inversión estimada en diseño e ingeniería</div>
+            <div class="price-big" id="quote-price">$15,000 USD</div>
+            <div style="font-size:0.88rem;color:var(--text-muted);" id="quote-time">Tiempo estimado de diseño y planos: 9 a 11 semanas</div>
+            <ul class="deliverable-list" id="quote-deliverables"></ul>
+          </div>
+          <button class="btn-primary" style="width:100%;justify-content:center;margin-top:14px;" onclick="openQuoteModal()">
+            Solicitar propuesta personalizada →
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- VISOR EN PANTALLA COMPLETA DE RENDERS Y MAQUETAS -->
+  <div id="render-lightbox" role="dialog" aria-modal="true" onclick="closeLightbox()">
+    <div class="lightbox-card" onclick="event.stopPropagation()">
+      <img id="lightbox-img" src="assets/img/villa.jpg" alt="Vista ampliada del proyecto" />
+      <div class="lightbox-meta">
+        <div>
+          <div style="font-size:0.82rem;color:var(--gold-soft);font-weight:500;" id="lightbox-tag">Visualización 3D</div>
+          <h3 id="lightbox-title" style="font-size:1.38rem;font-weight:600;margin:4px 0 6px;">Proyecto Arquitectónico</h3>
+          <p id="lightbox-desc" style="color:var(--text-body);font-size:0.94rem;max-width:680px;"></p>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button class="btn-primary" onclick="closeLightbox(); openQuoteModal();">Cotizar un proyecto así</button>
+          <button class="btn-secondary" onclick="closeLightbox()">Cerrar ✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONTACTO -->
+  <div id="quote-modal" role="dialog" aria-modal="true" onclick="closeQuoteModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h3 style="font-weight:600;font-size:1.3rem;">Cuéntanos sobre tu proyecto</h3>
+        <button onclick="closeQuoteModal()" aria-label="Cerrar ventana" style="background:none;border:none;color:var(--text-muted);font-size:1.5rem;cursor:pointer;">×</button>
+      </div>
+      <form id="quote-form" onsubmit="submitProjectBrief(event)">
+        <div class="form-row">
+          <label for="client-name">Tu nombre o empresa</label>
+          <input type="text" id="client-name" required placeholder="Ej. Familia Morales / Grupo Inmobiliario" />
+        </div>
+        <div class="form-row">
+          <label for="client-contact">WhatsApp o correo para responderte</label>
+          <input type="text" id="client-contact" required placeholder="+507 6000-0000 / correo@ejemplo.com" />
+        </div>
+        <div class="form-row">
+          <label for="client-brief">Resumen de lo que te gustaría realizar</label>
+          <textarea id="client-brief" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">Enviar solicitud</button>
+      </form>
+      <div id="brief-confirm" style="display:none;margin-top:16px;padding:14px;border-radius:12px;background:rgba(52,211,153,0.15);border:1px solid var(--sage);color:#d1fae5;font-size:0.9rem;"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p><strong>Vértice Estudio</strong> — Arquitectura, Ingeniería, Diseño de Planos, Modelado SketchUp / Revit, Renders y Dirección de Proyectos.</p>
+  </footer>
+
+  <script>
+    const RENDERS_DB = {
+      skp_villa: {
+        img: "assets/img/skp-villa.jpg",
+        tag: "Modelo 3D SketchUp Pro + Ejes Revit",
+        title: "Maqueta 3D Residencia Horizon — Volumetría, Pérgola, Escalera y Piscina",
+        desc: "Maqueta arquitectónica y estructural desarrollada en SketchUp Pro y Revit con ejes constructivos A–D / 1–4, estudio de sombras reales, ventanería modulada y detalles constructivos."
+      },
+      villa: {
+        img: "assets/img/villa.jpg",
+        tag: "Casa Residencial Contemporánea • Render 8K",
+        title: "Residencia Horizon — Voladizo, Luz Cálida y Piscina Infinita",
+        desc: "Diseñada para conectar la sala y las terrazas directamente con el jardín y el agua. Incluye arquitectura bioclimática, cálculo del voladizo en acero y planos completos de construcción."
+      },
+      skp_tower: {
+        img: "assets/img/skp-tower.jpg",
+        tag: "Modelo Estructural y Arquitectónico Revit BIM",
+        title: "Maqueta BIM Torre Vértice — Núcleo Sísmico, Arriostramientos y Terrazas",
+        desc: "Modelo tridimensional en Autodesk Revit con coordinación de columnas perimetrales, núcleo rígido de concreto, terrazas verdes en voladizo y ejes estructurales en planta."
+      },
+      tower: {
+        img: "assets/img/tower.jpg",
+        tag: "Edificio Corporativo y Residencial • Render 8K",
+        title: "Torre Vértice — Fachada Acristalada y Terrazas Verdes",
+        desc: "Edificio de uso mixto con jardines en altura, plaza peatonal con espejos de agua, ingeniería estructural sismorresistente y coordinación de todas sus instalaciones en 3D."
+      },
+      skp_industrial: {
+        img: "assets/img/skp-industrial.jpg",
+        tag: "Modelo Revit / SketchUp Civil e Industrial",
+        title: "Maqueta 3D Complejo Industrial — Cerchas Metálicas, Puente y Muelles",
+        desc: "Modelado integral del conjunto corporativo y logístico mostrando el entramado de cerchas de acero en cubierta, paneles solares, andenes de carga y vialidad."
+      },
+      industrial: {
+        img: "assets/img/industrial.jpg",
+        tag: "Proyecto General Comercial e Industrial • Render 8K",
+        title: "Parque Empresarial y Centro Logístico Sostenible",
+        desc: "Conjunto integral con oficinas corporativas, nave logística con paneles solares, vialidad para transporte pesado, áreas verdes y programación detallada de obra."
+      },
+      bim_cutaway: {
+        img: "assets/img/bim-cutaway.jpg",
+        tag: "Ingeniería y Coordinación 3D",
+        title: "Del Esqueleto Estructural e Instalaciones al Edificio Terminado",
+        desc: "Integramos cimientos, columnas de acero, ductos de aire acondicionado e instalaciones eléctricas en un mismo modelo 3D para construir con precisión y sin retrabajos."
+      },
+      blueprint_iso: {
+        img: "assets/img/blueprint-iso.jpg",
+        tag: "Diseño de Planos y Vistas 3D",
+        title: "Planos Constructivos Claros y Cortes en Tres Dimensiones",
+        desc: "Entregamos juegos completos de planos listos para permisos y construcción, acompañados de vistas isométricas en 3D para visualizar fácilmente cada ambiente."
+      },
+      interior: {
+        img: "assets/img/interior.jpg",
+        tag: "Arquitectura Interior y Renders",
+        title: "Espacios en Doble Altura con Materiales Naturales",
+        desc: "Visualización realista de interiores cuidando cada textura: escalera ligera en madera y acero, muros en piedra natural e iluminación arquitectónica acogedora."
+      }
+    };
+
+    const HERO_PROJECTS = {
+      villa: {
+        label: "Residencia Horizon — Ejes A–D / 1–4 (SketchUp + Revit)",
+        skpImg: "assets/img/skp-villa.jpg",
+        renderImg: "assets/img/villa.jpg",
+        pins: [
+          { x: 34, y: 24, title: "Voladizo Estructural y Alero en Cedro", desc: "Estructura oculta en acero y concreto calculada para volar sobre la terraza sin columnas intermedias." },
+          { x: 47, y: 51, title: "Escalera Exterior y Doble Altura", desc: "Circulación abierta con peldaños en voladizo y ventanales de piso a techo modulados en Revit." },
+          { x: 64, y: 50, title: "Pérgola Bioclimática en Madera", desc: "Entramado de vigas que filtra el sol de la tarde y proyecta sombras suaves sobre la sala exterior." },
+          { x: 42, y: 71, title: "Piscina Infinita en Corte 3D", desc: "Vaso estructural acotado en los ejes A–C con sistema hidrosanitario y borde infinito." }
+        ]
+      },
+      tower: {
+        label: "Torre Vértice — Uso Mixto (Revit Estructura + BIM)",
+        skpImg: "assets/img/skp-tower.jpg",
+        renderImg: "assets/img/tower.jpg",
+        pins: [
+          { x: 53, y: 26, title: "Núcleo Rígido Sismorresistente", desc: "Muro estructural central en concreto armado que concentra ascensores, escaleras de emergencia y ductos MEP." },
+          { x: 46, y: 44, title: "Terrazas Verdes en Voladizo", desc: "Jardines en altura con estructura metálica diagonal arriostrada y drenaje pluvial integrado." },
+          { x: 45, y: 62, title: "Muro Cortina de Control Solar", desc: "Modulación de fachada en vidrio laminado de alta eficiencia térmica y acústica." },
+          { x: 50, y: 84, title: "Plaza Urbana y Espejos de Agua", desc: "Planta baja libre de doble altura conectada con el espacio público y ejes constructivos." }
+        ]
+      },
+      industrial: {
+        label: "Parque Empresarial y Logístico (Revit Civil + Acero)",
+        skpImg: "assets/img/skp-industrial.jpg",
+        renderImg: "assets/img/industrial.jpg",
+        pins: [
+          { x: 24, y: 46, title: "Sede Corporativa de 4 Niveles", desc: "Edificio administrativo con fachada acristalada, salas de juntas y control energético." },
+          { x: 41, y: 43, title: "Puente Conector Aéreo", desc: "Pasarela estructural en acero y vidrio que comunica las oficinas con la planta logística." },
+          { x: 62, y: 40, title: "Cerchas Metálicas de Gran Luz", desc: "Cubierta industrial sin columnas intermedias para máximo aprovechamiento de almacenamiento." },
+          { x: 76, y: 48, title: "Muelles de Carga y Vialidad Pesada", desc: "Andenes niveladores y radios de giro calculados para maniobra simultánea de transporte pesado." }
+        ]
+      }
+    };
+
+    /* =========================================================================
+       MENÚ MÓVIL Y ACCESIBILIDAD DE MODALES
+       ========================================================================= */
+    function toggleMobileMenu() {
+      const nav = document.getElementById('nav-links');
+      const btn = document.getElementById('mobile-menu-btn');
+      const isOpen = nav.classList.toggle('open');
+      btn.textContent = isOpen ? '✕' : '☰';
+    }
+
+    function closeMobileMenu() {
+      const nav = document.getElementById('nav-links');
+      const btn = document.getElementById('mobile-menu-btn');
+      nav.classList.remove('open');
+      if (btn) btn.textContent = '☰';
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeLightbox();
+        closeQuoteModal();
+        closeMobileMenu();
+      }
+    });
+
+    /* =========================================================================
+       1. FONDO AMBIENTAL SUAVE
+       ========================================================================= */
+    const bgCanvas = document.getElementById('bg-ambient-canvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    const cursorAura = document.getElementById('cursor-aura');
+    let targetMouseX = window.innerWidth / 2, targetMouseY = window.innerHeight / 2;
+    let smoothMouseX = targetMouseX, smoothMouseY = targetMouseY;
+
+    function resizeBg() {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+      if (typeof drawSCurve === 'function') {
+        drawSCurve(selectedPhaseIndex, scurveAnimProgress || 1);
+      }
+    }
+    window.addEventListener('resize', resizeBg);
+    resizeBg();
+
+    window.addEventListener('mousemove', (e) => {
+      targetMouseX = e.clientX;
+      targetMouseY = e.clientY;
+    }, { passive: true });
+
+    window.addEventListener('scroll', () => {
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = maxScroll > 0 ? (window.scrollY / maxScroll) * 100 : 0;
+      document.getElementById('scroll-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    const particles = Array.from({ length: 28 }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: 1 + Math.random() * 2,
+      vx: (Math.random() - 0.5) * 0.22,
+      vy: -0.12 - Math.random() * 0.25,
+      alpha: 0.14 + Math.random() * 0.35,
+      warm: Math.random() > 0.4
+    }));
+
+    let bgTime = 0;
+    function renderAmbientBg() {
+      bgTime += 0.006;
+      smoothMouseX += (targetMouseX - smoothMouseX) * 0.08;
+      smoothMouseY += (targetMouseY - smoothMouseY) * 0.08;
+      cursorAura.style.transform = `translate3d(${smoothMouseX - 280}px, ${smoothMouseY - 280}px, 0)`;
+
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.y < -10) p.y = bgCanvas.height + 10;
+        if (p.x < -10) p.x = bgCanvas.width + 10;
+        if (p.x > bgCanvas.width + 10) p.x = -10;
+        const pulse = p.alpha * (0.7 + 0.3 * Math.sin(bgTime * 3 + p.x * 0.01));
+        bgCtx.fillStyle = p.warm ? `rgba(224, 177, 114, ${pulse})` : `rgba(125, 211, 252, ${pulse})`;
+        bgCtx.beginPath(); bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2); bgCtx.fill();
+      });
+      requestAnimationFrame(renderAmbientBg);
+    }
+    requestAnimationFrame(renderAmbientBg);
+
+    /* =========================================================================
+       2. VISOR INTERACTIVO SKETCHUP / REVIT 3D CON PERSPECTIVA, PINES Y TRANSICIÓN
+       ========================================================================= */
+    const skpViewport = document.getElementById('skp-viewport');
+    const skpStage = document.getElementById('skp-stage');
+    const heroRenderOverlay = document.getElementById('hero-render-overlay');
+    const heroSplitBar = document.getElementById('hero-split-bar');
+
+    let studioState = {
+      project: 'villa',
+      viewMode: 'sketchup', // 'sketchup' | 'split' | 'render' | 'cad'
+      zoom: 1.0,
+      targetZoom: 1.0,
+      rotX: 0,
+      rotY: 0,
+      targetRotX: 0,
+      targetRotY: 0,
+      blend: 0, // 0 = 100% SketchUp/Revit, 100 = 100% Render 8K
+      targetBlend: 0,
+      isDraggingSplit: false
+    };
+
+    function renderHeroPins() {
+      const container = document.getElementById('skp-pins-layer');
+      container.innerHTML = '';
+      const proj = HERO_PROJECTS[studioState.project];
+      proj.pins.forEach((pin, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'skp-pin' + (idx === 0 ? ' active-pin' : '');
+        btn.style.left = pin.x + '%';
+        btn.style.top = pin.y + '%';
+        btn.textContent = '+';
+        btn.setAttribute('aria-label', pin.title);
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          document.querySelectorAll('.skp-pin').forEach(p => p.classList.remove('active-pin'));
+          btn.classList.add('active-pin');
+          document.getElementById('pin-title').textContent = pin.title;
+          document.getElementById('pin-desc').textContent = pin.desc;
+        };
+        container.appendChild(btn);
+      });
+      document.getElementById('pin-title').textContent = proj.pins[0].title;
+      document.getElementById('pin-desc').textContent = proj.pins[0].desc;
+    }
+
+    function selectHeroProject(key) {
+      studioState.project = key;
+      document.getElementById('building-type').value = key;
+      const proj = HERO_PROJECTS[key];
+      document.getElementById('studio-project-label').textContent = proj.label;
+      document.getElementById('hero-skp-img').src = proj.skpImg;
+      document.getElementById('hero-render-img').src = proj.renderImg;
+
+      document.querySelectorAll('.mini-render-card').forEach(c => c.classList.remove('active-thumb'));
+      const thumb = document.getElementById('thumb-' + key);
+      if (thumb) thumb.classList.add('active-thumb');
+
+      renderHeroPins();
+    }
+
+    function syncStudioModeButtons(activeId) {
+      document.querySelectorAll('.bim-topbar .mode-btn').forEach(b => b.classList.remove('active'));
+      const targetBtn = document.getElementById(activeId);
+      if (targetBtn) targetBtn.classList.add('active');
+    }
+
+    function setStudioViewMode(mode, btn) {
+      studioState.viewMode = mode;
+      document.querySelectorAll('.bim-topbar .mode-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const skpImg = document.getElementById('hero-skp-img');
+      if (mode === 'sketchup') {
+        studioState.targetBlend = 0;
+        document.getElementById('blend-slider').value = 0;
+        document.getElementById('blend-val').textContent = '0%';
+        heroSplitBar.style.display = 'none';
+        skpImg.style.filter = 'none';
+      } else if (mode === 'split') {
+        studioState.targetBlend = 50;
+        document.getElementById('blend-slider').value = 50;
+        document.getElementById('blend-val').textContent = '50%';
+        heroSplitBar.style.display = 'block';
+        skpImg.style.filter = 'none';
+      } else if (mode === 'render') {
+        studioState.targetBlend = 100;
+        document.getElementById('blend-slider').value = 100;
+        document.getElementById('blend-val').textContent = '100%';
+        heroSplitBar.style.display = 'none';
+        skpImg.style.filter = 'none';
+      } else if (mode === 'cad') {
+        studioState.targetBlend = 0;
+        document.getElementById('blend-slider').value = 0;
+        document.getElementById('blend-val').textContent = '0%';
+        heroSplitBar.style.display = 'none';
+        skpImg.style.filter = 'grayscale(100%) contrast(135%) brightness(1.04)';
+      }
+    }
+
+    function updateStudioZoom(val) {
+      studioState.targetZoom = parseFloat(val) / 100;
+      document.getElementById('zoom-val').textContent = val + '%';
+    }
+
+    function updateStudioBlend(val) {
+      const pct = Math.max(0, Math.min(100, parseFloat(val)));
+      studioState.targetBlend = pct;
+      document.getElementById('blend-slider').value = Math.round(pct);
+      document.getElementById('blend-val').textContent = Math.round(pct) + '%';
+
+      const skpImg = document.getElementById('hero-skp-img');
+      if (pct > 0 && studioState.viewMode === 'cad') {
+        skpImg.style.filter = 'none';
+      }
+
+      if (pct <= 2) {
+        heroSplitBar.style.display = 'none';
+        if (studioState.viewMode !== 'cad') {
+          studioState.viewMode = 'sketchup';
+          syncStudioModeButtons('mode-btn-sketchup');
+        }
+      } else if (pct >= 98) {
+        heroSplitBar.style.display = 'none';
+        studioState.viewMode = 'render';
+        syncStudioModeButtons('mode-btn-render');
+      } else {
+        heroSplitBar.style.display = 'block';
+        studioState.viewMode = 'split';
+        syncStudioModeButtons('mode-btn-split');
+      }
+    }
+
+    function handleHeroPointerMove(clientX, clientY, isDragging) {
+      const rect = skpViewport.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+      studioState.targetRotX = ((y - cy) / cy) * -5.5;
+      studioState.targetRotY = ((x - cx) / cx) * 6.5;
+
+      if (isDragging && (studioState.isDraggingSplit || studioState.viewMode === 'split')) {
+        const pct = Math.max(0, Math.min(100, ((rect.width - x) / rect.width) * 100));
+        updateStudioBlend(pct);
+      }
+    }
+
+    skpViewport.addEventListener('mousemove', (e) => {
+      handleHeroPointerMove(e.clientX, e.clientY, e.buttons === 1);
+    });
+
+    skpViewport.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.skp-pin') || e.target.closest('.skp-pin-card')) return;
+      if (studioState.viewMode === 'split' || (studioState.targetBlend > 0 && studioState.targetBlend < 100)) {
+        studioState.isDraggingSplit = true;
+        handleHeroPointerMove(e.clientX, e.clientY, true);
+      }
+    });
+    window.addEventListener('mouseup', () => { studioState.isDraggingSplit = false; });
+
+    skpViewport.addEventListener('touchstart', (e) => {
+      if (e.target.closest('.skp-pin') || e.target.closest('.skp-pin-card')) return;
+      if (studioState.viewMode === 'split' || (studioState.targetBlend > 0 && studioState.targetBlend < 100)) {
+        studioState.isDraggingSplit = true;
+        if (e.touches[0]) handleHeroPointerMove(e.touches[0].clientX, e.touches[0].clientY, true);
+      }
+    }, { passive: true });
+
+    skpViewport.addEventListener('touchmove', (e) => {
+      if (studioState.isDraggingSplit && e.touches[0]) {
+        handleHeroPointerMove(e.touches[0].clientX, e.touches[0].clientY, true);
+      }
+    }, { passive: true });
+
+    skpViewport.addEventListener('touchend', () => {
+      studioState.isDraggingSplit = false;
+      studioState.targetRotX = 0;
+      studioState.targetRotY = 0;
+    });
+
+    skpViewport.addEventListener('mouseleave', () => {
+      studioState.targetRotX = 0;
+      studioState.targetRotY = 0;
+    });
+
+    function animateStudioLoop() {
+      studioState.rotX += (studioState.targetRotX - studioState.rotX) * 0.1;
+      studioState.rotY += (studioState.targetRotY - studioState.rotY) * 0.1;
+      studioState.zoom += (studioState.targetZoom - studioState.zoom) * 0.12;
+      studioState.blend += (studioState.targetBlend - studioState.blend) * 0.16;
+
+      skpStage.style.transform = `rotateX(${studioState.rotX.toFixed(2)}deg) rotateY(${studioState.rotY.toFixed(2)}deg) scale(${studioState.zoom.toFixed(3)})`;
+
+      const leftClipPct = (100 - studioState.blend).toFixed(2);
+      heroRenderOverlay.style.clipPath = `inset(0 0 0 ${leftClipPct}%)`;
+      heroSplitBar.style.left = `${leftClipPct}%`;
+
+      requestAnimationFrame(animateStudioLoop);
+    }
+    renderHeroPins();
+    requestAnimationFrame(animateStudioLoop);
+
+    function openCurrentHeroLightbox() {
+      const key = studioState.blend >= 50 ? studioState.project : ('skp_' + studioState.project);
+      openLightbox(key);
+    }
+
+    /* =========================================================================
+       3. TARJETAS 3D CON INERCIA SUAVE (LERP)
+       ========================================================================= */
+    const tiltCards = [];
+    document.querySelectorAll('.smooth-tilt').forEach(card => {
+      const glare = card.querySelector('.tilt-glare');
+      const state = { el: card, glare, targetRotX: 0, targetRotY: 0, currRotX: 0, currRotY: 0, targetLift: 0, currLift: 0, hovering: false };
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left, y = e.clientY - rect.top;
+        const cx = rect.width / 2, cy = rect.height / 2;
+        state.targetRotX = ((y - cy) / cy) * -6.0;
+        state.targetRotY = ((x - cx) / cx) * 6.0;
+        state.targetLift = -6;
+        state.hovering = true;
+        if (glare) glare.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(224, 177, 114, 0.18), transparent 65%)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        state.targetRotX = 0; state.targetRotY = 0; state.targetLift = 0; state.hovering = false;
+      });
+      tiltCards.push(state);
+    });
+
+    function animateTiltCards() {
+      tiltCards.forEach(s => {
+        s.currRotX += (s.targetRotX - s.currRotX) * 0.12;
+        s.currRotY += (s.targetRotY - s.currRotY) * 0.12;
+        s.currLift += (s.targetLift - s.currLift) * 0.12;
+        if (Math.abs(s.currRotX) > 0.01 || Math.abs(s.currRotY) > 0.01 || Math.abs(s.currLift) > 0.05) {
+          s.el.style.transform = `perspective(1200px) rotateX(${s.currRotX.toFixed(2)}deg) rotateY(${s.currRotY.toFixed(2)}deg) translateY(${s.currLift.toFixed(2)}px)`;
+        } else if (!s.hovering) {
+          s.el.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+        }
+      });
+      requestAnimationFrame(animateTiltCards);
+    }
+    requestAnimationFrame(animateTiltCards);
+
+    /* =========================================================================
+       4. FILTRO DE PORTAFOLIO Y LIGHTBOX
+       ========================================================================= */
+    function filterPortfolio(cat, btn) {
+      document.querySelectorAll('.filter-bar .filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('#portfolio-grid .render-card-3d').forEach(card => {
+        if (card._hideTimer) {
+          clearTimeout(card._hideTimer);
+          card._hideTimer = null;
+        }
+        const cats = card.getAttribute('data-cat').split(/\s+/);
+        if (cat === 'all' || cats.includes(cat)) {
+          card.style.display = 'block';
+          requestAnimationFrame(() => { card.style.opacity = '1'; });
+        } else {
+          card.style.opacity = '0';
+          card._hideTimer = setTimeout(() => { card.style.display = 'none'; }, 220);
+        }
+      });
+    }
+
+    function openLightbox(key) {
+      const item = RENDERS_DB[key];
+      if (!item) return;
+      document.getElementById('lightbox-img').src = item.img;
+      document.getElementById('lightbox-tag').textContent = item.tag;
+      document.getElementById('lightbox-title').textContent = item.title;
+      document.getElementById('lightbox-desc').textContent = item.desc;
+      document.getElementById('render-lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      document.getElementById('render-lightbox').classList.remove('open');
+      if (!document.getElementById('quote-modal').classList.contains('open')) {
+        document.body.style.overflow = '';
+      }
+    }
+
+    /* =========================================================================
+       5. ESCÁNER COMPARADOR CON INERCIA (SKETCHUP / REVIT ↔ RENDER 8K)
+       ========================================================================= */
+    const compBox = document.getElementById('compare-box');
+    const compLeftClip = document.getElementById('compare-left-clip');
+    const compLine = document.getElementById('compare-line');
+    const compHandle = document.getElementById('compare-handle');
+    let isComparing = false, targetSplit = 0.5, currentSplit = 0.5, autoSweepActive = false, sweepTime = 0;
+
+    function setSplitTargetFromX(clientX) {
+      const rect = compBox.getBoundingClientRect();
+      targetSplit = Math.max(0.04, Math.min(0.96, (clientX - rect.left) / rect.width));
+    }
+
+    compBox.addEventListener('mousedown', (e) => {
+      isComparing = true; autoSweepActive = false;
+      const sweepBtn = document.getElementById('auto-sweep-btn');
+      if (sweepBtn) {
+        sweepBtn.classList.remove('active');
+        sweepBtn.textContent = '▶ Barrido Automático';
+      }
+      setSplitTargetFromX(e.clientX);
+    });
+    window.addEventListener('mouseup', () => { isComparing = false; });
+    window.addEventListener('mousemove', (e) => { if (isComparing) setSplitTargetFromX(e.clientX); });
+    compBox.addEventListener('touchstart', (e) => {
+      isComparing = true; autoSweepActive = false;
+      const sweepBtn = document.getElementById('auto-sweep-btn');
+      if (sweepBtn) {
+        sweepBtn.classList.remove('active');
+        sweepBtn.textContent = '▶ Barrido Automático';
+      }
+      if (e.touches[0]) setSplitTargetFromX(e.touches[0].clientX);
+    }, { passive: true });
+    window.addEventListener('touchend', () => { isComparing = false; });
+    window.addEventListener('touchmove', (e) => { if (isComparing && e.touches[0]) setSplitTargetFromX(e.touches[0].clientX); }, { passive: true });
+
+    function toggleAutoSweep(btn) {
+      autoSweepActive = !autoSweepActive;
+      btn.classList.toggle('active', autoSweepActive);
+      btn.textContent = autoSweepActive ? '⏸ Pausar Barrido' : '▶ Barrido Automático';
+    }
+
+    function animateCompareLoop() {
+      if (autoSweepActive) {
+        sweepTime += 0.018;
+        targetSplit = 0.5 + 0.38 * Math.sin(sweepTime);
+      }
+      currentSplit += (targetSplit - currentSplit) * 0.14;
+      const rightInset = ((1 - currentSplit) * 100).toFixed(2);
+      const leftPct = (currentSplit * 100).toFixed(2) + '%';
+      compLeftClip.style.clipPath = `inset(0 ${rightInset}% 0 0)`;
+      compLine.style.left = leftPct;
+      compHandle.style.left = leftPct;
+      requestAnimationFrame(animateCompareLoop);
+    }
+    requestAnimationFrame(animateCompareLoop);
+
+    function setComparePair(pair, btn) {
+      btn.parentElement.querySelectorAll('.mode-btn:not(#auto-sweep-btn)').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (pair === 'villa_skp') {
+        document.getElementById('compare-left-img').src = RENDERS_DB.skp_villa.img;
+        document.getElementById('compare-right-img').src = RENDERS_DB.villa.img;
+        document.getElementById('compare-scene-title').textContent = 'Casa Residencial (Maqueta SketchUp 3D vs. Render Final)';
+      } else if (pair === 'tower_skp') {
+        document.getElementById('compare-left-img').src = RENDERS_DB.skp_tower.img;
+        document.getElementById('compare-right-img').src = RENDERS_DB.tower.img;
+        document.getElementById('compare-scene-title').textContent = 'Torre Vértice (Maqueta Estructural Revit vs. Render Final)';
+      } else if (pair === 'ind_skp') {
+        document.getElementById('compare-left-img').src = RENDERS_DB.skp_industrial.img;
+        document.getElementById('compare-right-img').src = RENDERS_DB.industrial.img;
+        document.getElementById('compare-scene-title').textContent = 'Complejo Industrial (Maqueta Revit Cerchas vs. Vista Aérea)';
+      } else {
+        document.getElementById('compare-left-img').src = RENDERS_DB.blueprint_iso.img;
+        document.getElementById('compare-right-img').src = RENDERS_DB.villa.img;
+        document.getElementById('compare-scene-title').textContent = 'Casa Residencial (Plano Isométrico 3D vs. Obra Terminada)';
+      }
+    }
+
+    /* =========================================================================
+       6. CRONOGRAMA INTERACTIVO Y CURVA S
+       ========================================================================= */
+    const ganttPhases = [
+      {
+        name: '1. Ideas y Maqueta SketchUp 3D',
+        start: 0, dur: 3,
+        desc: 'Conocemos tu terreno y tus necesidades, planteamos la distribución ideal y levantamos el modelo en SketchUp y Revit para que sientas las proporciones reales del proyecto.',
+        deliverable: 'Recibes: Maqueta 3D + Distribución',
+        kpi: 'Meta: Diseño a tu gusto'
+      },
+      {
+        name: '2. Diseño de Planos Claros',
+        start: 2, dur: 4,
+        desc: 'Dibujamos todos los planos arquitectónicos con medidas exactas, cortes, fachadas y detalles para tramitar permisos y construir sin dudas.',
+        deliverable: 'Recibes: Juego Completo de Planos',
+        kpi: 'Meta: Listo para Permisos'
+      },
+      {
+        name: '3. Ingeniería y Estructuras',
+        start: 3, dur: 4,
+        desc: 'Calculamos los cimientos, columnas y vigas junto con los planos eléctricos, sanitarios y de agua para garantizar una obra segura y eficiente.',
+        deliverable: 'Recibes: Cálculo y Planos de Ingeniería',
+        kpi: 'Meta: Obra 100% Segura'
+      },
+      {
+        name: '4. Renders Realistas y Costos',
+        start: 5, dur: 3,
+        desc: 'Preparamos las imágenes realistas finales de interiores y exteriores junto con el listado de materiales y presupuesto base de construcción.',
+        deliverable: 'Recibes: Renders + Presupuesto Base',
+        kpi: 'Meta: Inversión Clara'
+      },
+      {
+        name: '5. Cimientos y Estructura',
+        start: 7, dur: 8,
+        desc: 'Iniciamos el movimiento de tierra, fundaciones y levantamiento de la estructura principal con supervisión constante de calidad y tiempos.',
+        deliverable: 'Recibes: Reportes Semanales de Avance',
+        kpi: 'Meta: Avance en Tiempo'
+      },
+      {
+        name: '6. Acabados y Entrega Final',
+        start: 14, dur: 10,
+        desc: 'Instalamos pisos, ventanería, carpintería, iluminación y jardines, probamos cada equipo y te entregamos tu proyecto listo para estrenar.',
+        deliverable: 'Recibes: Obra Terminada Llave en Mano',
+        kpi: 'Meta: Entrega Satisfactoria'
+      }
+    ];
+
+    let scheduleMultiplier = 1, selectedPhaseIndex = 0, scurveAnimProgress = 0;
+
+    function renderGantt() {
+      const container = document.getElementById('gantt-container');
+      container.innerHTML = '';
+      const totalBaseWeeks = 24;
+      ganttPhases.forEach((p, idx) => {
+        const row = document.createElement('div');
+        row.className = 'gantt-row' + (idx === selectedPhaseIndex ? ' active' : '');
+        const leftPct = (p.start / totalBaseWeeks) * 100;
+        const widthPct = (p.dur / totalBaseWeeks) * 100;
+        const weeksScaled = Math.round(p.dur * scheduleMultiplier);
+        row.innerHTML = `
+          <div class="gantt-phase-name">${p.name}</div>
+          <div class="gantt-track"><div class="gantt-bar" style="left:${leftPct}%; width:${widthPct}%;"></div></div>
+          <div class="gantt-weeks">${weeksScaled} sem</div>
+        `;
+        row.onclick = () => {
+          selectedPhaseIndex = idx;
+          renderGantt();
+          const ph = ganttPhases[idx];
+          document.getElementById('detail-title').textContent = ph.name;
+          document.getElementById('detail-desc').textContent = ph.desc;
+          document.getElementById('detail-deliverable').textContent = ph.deliverable;
+          document.getElementById('detail-kpi').textContent = ph.kpi;
+          triggerSCurveAnimation();
+        };
+        container.appendChild(row);
+      });
+    }
+
+    function setScheduleScale(mult, btn) {
+      scheduleMultiplier = mult;
+      btn.parentElement.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderGantt();
+      triggerSCurveAnimation();
+    }
+
+    function triggerSCurveAnimation() {
+      scurveAnimProgress = 0;
+      function step() {
+        scurveAnimProgress = Math.min(1, scurveAnimProgress + 0.05);
+        drawSCurve(selectedPhaseIndex, scurveAnimProgress);
+        if (scurveAnimProgress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    function drawSCurve(highlightIdx, animProg = 1) {
+      const canvas = document.getElementById('scurve-canvas');
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      if (!rect.width) return;
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+      const w = rect.width, h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      for (let i = 1; i <= 4; i++) {
+        const y = (h / 5) * i;
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+
+      const maxDrawX = w * animProg;
+      ctx.strokeStyle = '#7dd3fc';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let x = 0; x <= maxDrawX; x += 4) {
+        const t = (x / w) * 10 - 5;
+        const s = 1 / (1 + Math.exp(-t * 0.9));
+        const y = h - 18 - s * (h - 36);
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      ctx.strokeStyle = '#e0b172';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 4]);
+      ctx.beginPath();
+      for (let x = 0; x <= maxDrawX; x += 4) {
+        const t = (x / w) * 10 - 5.2;
+        const s = 1 / (1 + Math.exp(-t * 0.88));
+        const y = h - 18 - s * (h - 36);
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const phaseProgress = (highlightIdx + 1) / ganttPhases.length;
+      const px = phaseProgress * (w - 24) + 12;
+      if (px <= maxDrawX + 4) {
+        const t = (px / w) * 10 - 5;
+        const s = 1 / (1 + Math.exp(-t * 0.9));
+        const py = h - 18 - s * (h - 36);
+        ctx.fillStyle = '#e0b172';
+        ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = '500 12px -apple-system, sans-serif';
+        ctx.fillText(`${Math.round(s * 100)}% completado`, Math.min(w - 105, px + 10), Math.max(18, py - 8));
+      }
+    }
+
+    setTimeout(() => { renderGantt(); triggerSCurveAnimation(); }, 60);
+
+    /* =========================================================================
+       7. CALCULADORA CON CONTADOR ANIMADO
+       ========================================================================= */
+    let displayedPrice = 15000, targetPrice = 15000;
+
+    function animatePriceCounter() {
+      if (Math.abs(targetPrice - displayedPrice) > 5) {
+        displayedPrice += (targetPrice - displayedPrice) * 0.18;
+        document.getElementById('quote-price').textContent = `$${Math.round(displayedPrice).toLocaleString()} USD`;
+        requestAnimationFrame(animatePriceCounter);
+      } else {
+        displayedPrice = targetPrice;
+        document.getElementById('quote-price').textContent = `$${Math.round(targetPrice).toLocaleString()} USD`;
+      }
+    }
+
+    function toggleServicePill(cbEl) {
+      const labelEl = cbEl.closest('.service-Toggle');
+      if (labelEl) {
+        labelEl.classList.toggle('selected', cbEl.checked);
+      }
+      recalcQuote();
+    }
+
+    function recalcQuote() {
+      const area = parseInt(document.getElementById('area-slider').value, 10);
+      const complex = parseInt(document.getElementById('complex-slider').value, 10);
+      document.getElementById('area-label').textContent = `${area.toLocaleString()} m²`;
+      const complexNames = {
+        1: 'Práctico y Funcional',
+        2: 'Residencial / Comercial Completo',
+        3: 'Alta Gama y Detalle Especial'
+      };
+      const complexMultipliers = { 1: 0.85, 2: 1.0, 3: 1.32 };
+      document.getElementById('complex-label').textContent = complexNames[complex];
+
+      const labels = document.querySelectorAll('#service-checkboxes .service-Toggle');
+      const deliverables = [];
+      let ratePerM2 = 0, weeks = 2;
+
+      const catalog = [
+        { rate: 12, wk: 2, item: 'Diseño arquitectónico pensado a tu medida y aprovechamiento de luz' },
+        { rate: 15, wk: 2, item: 'Juego completo de planos constructivos y para permisos municipales' },
+        { rate: 14, wk: 2, item: 'Cálculo estructural seguro y planos de electricidad y agua' },
+        { rate: 9,  wk: 1, item: 'Maqueta digital en SketchUp / Revit y paquete de renders realistas' },
+        { rate: 7,  wk: 1, item: 'Calendario detallado de obra por etapas y presupuesto base' },
+        { rate: 18, wk: 4, item: 'Acompañamiento, compras y supervisión técnica durante la obra' }
+      ];
+
+      labels.forEach((lbl, idx) => {
+        if (lbl.querySelector('input').checked) {
+          ratePerM2 += catalog[idx].rate;
+          weeks += catalog[idx].wk;
+          deliverables.push(catalog[idx].item);
+        }
+      });
+
+      if (deliverables.length === 0) deliverables.push('Selecciona al menos una etapa para ver qué incluye tu propuesta');
+      targetPrice = Math.round(area * ratePerM2 * complexMultipliers[complex]);
+      requestAnimationFrame(animatePriceCounter);
+
+      document.getElementById('quote-time').textContent = `Tiempo estimado de diseño y planos: ${weeks} a ${weeks + 2} semanas`;
+      document.getElementById('quote-deliverables').innerHTML = deliverables.map(d => `<li>${d}</li>`).join('');
+    }
+    recalcQuote();
+
+    function openQuoteModal() {
+      const area = document.getElementById('area-label').textContent;
+      const price = document.getElementById('quote-price').textContent;
+      const items = Array.from(document.querySelectorAll('#quote-deliverables li')).map(li => '• ' + li.textContent).join('\n');
+      document.getElementById('client-brief').value = `Proyecto aproximado de ${area} (Estimado ${price}):\n${items}`;
+      const confirmBox = document.getElementById('brief-confirm');
+      confirmBox.style.display = 'none';
+      confirmBox.textContent = '';
+      document.getElementById('quote-modal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeQuoteModal() {
+      document.getElementById('quote-modal').classList.remove('open');
+      if (!document.getElementById('render-lightbox').classList.contains('open')) {
+        document.body.style.overflow = '';
+      }
+    }
+
+    function submitProjectBrief(e) {
+      e.preventDefault();
+      const name = document.getElementById('client-name').value.trim();
+      const contact = document.getElementById('client-contact').value.trim();
+      const box = document.getElementById('brief-confirm');
+      box.style.display = 'block';
+      box.textContent = `¡Muchas gracias, ${name}! Hemos registrado tu solicitud (${contact}) con los detalles de tu proyecto y te contactaremos muy pronto para conversar.`;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
