@@ -1973,9 +1973,6 @@
     function resizeBg() {
       bgCanvas.width = window.innerWidth;
       bgCanvas.height = window.innerHeight;
-      if (typeof drawSCurve === 'function') {
-        drawSCurve(selectedPhaseIndex, scurveAnimProgress || 1);
-      }
     }
     window.addEventListener('resize', resizeBg);
     resizeBg();
@@ -2544,6 +2541,9 @@
     }
 
     setTimeout(() => { renderGantt(); triggerSCurveAnimation(); }, 60);
+    window.addEventListener('resize', () => {
+      drawSCurve(selectedPhaseIndex, scurveAnimProgress || 1);
+    });
 
     /* =========================================================================
        7. CALCULADORA CON CONTADOR ANIMADO
